@@ -1,2 +1,7 @@
 flask>=2.0.0
 gunicorn>=20.1.0
+Flask-SQLAlchemy
+Flask-Bcrypt
+Flask-SocketIO
+Werkzeug
+Pillow
