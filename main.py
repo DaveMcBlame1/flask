@@ -10,7 +10,7 @@ from PIL import Image
 # Initialize the Flask app
 app = Flask(__name__, template_folder='source')
 app.config["SQLALCHEMY_BINDS"] = {
-    'users': 'sqlite:///users.db',
+    'users': 'mysql://root:IreqgtmmEHAyQtgJxDgwMrdEeBTIFKoa@nozomi.proxy.rlwy.net:20515/railway',
     'messages': 'sqlite:///messages.db',
     'bannedusers': 'sqlite:///bannedusers.db'
 }
