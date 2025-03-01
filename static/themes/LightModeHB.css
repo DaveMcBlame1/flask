@@ -1,0 +1,84 @@
+:root {
+    --transition-duration: 0.2s;
+}
+body {
+    font-family: Arial, sans-serif;
+    background-color: #96a9ab;
+    color: white;
+    margin: 0;
+    padding: 0;
+    transition: background-color var(--transition-duration), color var(--transition-duration);
+}
+header {
+    background-color: #00796b;
+    color: white;
+    padding: 10px 0;
+    text-align: center;
+    transition: background-color var(--transition-duration), color var(--transition-duration);
+}
+
+.usernav {
+    background-color: #004d40;
+    padding: 10px;
+    text-align: center;
+    transition: background-color var(--transition-duration), color var(--transition-duration);
+}
+.navbar {
+    background-color: #004d40; /* Darker navigation */
+    padding: 10px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    transition: background-color var(--transition-duration), color var(--transition-duration);
+}
+nav a {
+    color: white;
+    margin: 0 15px;
+    text-decoration: none;
+    transition: background-color var(--transition-duration), color var(--transition-duration);
+}
+nav a:hover {
+    color: #b2dfdb; /* Light teal */
+    transition: background-color var(--transition-duration), color var(--transition-duration);
+}
+.container {
+    padding: 20px;
+    color: white;
+    transition: background-color var(--transition-duration), color var(--transition-duration);
+}
+/* Style the link to look like normal text */
+.container a {
+    color: inherit; /* Inherit the color from the parent element */
+    text-decoration: none; /* Remove the underline */
+}
+
+.container a:hover {
+    text-decoration: underline; /* Optionally add underline on hover */
+}
+footer {
+    background-color: #00796b;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    transition: background-color var(--transition-duration), color var(--transition-duration);
+}
+.sorrytext {
+    font-size: 2em;
+    color: #ffffff;
+}
+.homepage {
+    display: block;
+    margin-top: 20px;
+    font-size: 1.5em;
+    color: #ffffff;
+}
+.logs {
+    color: #ffffff;
+    font-size: 1.5em;
+    overflow-y: auto;
+    margin-bottom: 90px;
+    margin-left: 15px;
+}

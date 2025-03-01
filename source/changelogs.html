@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelogs</title> <!--this is the title of the tab-->
+    <script src="/static/js/index.js"></script>
+    <link rel="stylesheet" href="/static/styles/loading.css" id="theme-link"> <!-- Default theme -->
+    <link rel="icon" href="/static/decals/decal.ico" type="image/x-icon"> <!--the tab icon-->
+    <link rel="stylesheet" href="/static/styles/profile.css"> <!-- Profile-specific styles -->
+</head>
+<body>
+    <!-- this header is the title of the page but not the name of the tab-->
+    <nav>
+        <div class="profile-container">
+            {% if user.profile_picture %}
+                <img class="pfp" src="{{ url_for('data', filename='profiles/' + user.profile_picture) }}" alt="Profile Picture" class="profile-picture">
+            {% else %}
+                <img class="pfp" src="{{ url_for('static', filename='images/profile-placeholder.png') }}" alt="Default Profile Picture" class="profile-picture">
+            {% endif %}
+        </div>
+        <div class="usernav">
+            <a href="/login">Login</a>
+            <a href="/register">Register</a>
+            <a href="/logout">Logout</a>
+            <a href="/profile">Profile</a>
+            <a href="/settings">Settings</a>
+        </div>
+    </nav>
+    <header> 
+        <h1>Changes and updates are displayed here</h1>
+    </header>
+
+    <nav class="navbar"> <!-- this is navigation-->
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+        <a href="/contact">Contact</a>
+        <a href="/support">Support</a>
+        <a href="/chat">Chat</a>
+        <a href="/changelogs">Changelogs</a>
+    </nav>
+ <!--this stuff below is the site info or whatever-->
+    <div class="logs">
+        <h2>Feb 23 2025 10:28 PM</h2>
+        <ul>
+            <li>Added /delete {message id} command. (Only the Owner can currently delete messages)</li>
+            <li>Fixed themes not loading</li>
+            <li>Fixed the chat room not working</li>
+            <li>Improved chat GUI (In simple words it looks more pretty)</li>
+            <li>Added SYSTEM message. Appears red for all users to its not a user</li>
+            <li>I plan to add a few more commands and the ability to change your name or just add display names.</li>
+            <li>Plan to add pings</li>
+        </ul>
+        <h2>Feb 22 2025 8:49 AM</h2>
+        <ul>
+            <li>Added a changelog page.</li>
+            <li>Added a chat room</li>
+            <li>Added a login page</li>
+            <li>Added a register page</li>
+            <li>Added a logout page</li>
+            <li>Added a support page</li>
+            <li>Added a settings page</li>
+            <li>Added a contact page</li>
+            <li>Added themes (can be found in settings)</li>
+            <li>Added a loading screen</li>
+            <li>Added theme transistion to reduce flashing</li>
+        </ul>
+        <h2>Feb 21 2025 10:03 AM</h2>
+        <ul>
+            <li>Made a error trigger for flask for full debuging.</li>
+            <li>Added site icon.</li>
+            <li>Added an image for the 404 page.(you can see you by typing gibberish in the url!)</li>
+        </ul>
+        <h2>Feb 21 2025 8:25 AM</h2>
+        <ul>
+            <li>Added the homepage and about section.</li>
+            <li>Rendered and set protocol for 404 errors.</li>
+            <li>Set up debug/logs. (are not public)</li>
+        </ul>
+        <h2>Feb 17 2025 2:11 PM</h2>
+        <p>The website was created.</p>
+    </div>
+    <footer> <!--copyright garb-->
+        <p>&copy; 2025 Your Website</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us</title>
+    <script src="/static/js/index.js"></script>
+    <link rel="stylesheet" href="/static/styles/loading.css" id="theme-link"> <!-- Default theme -->
+    <link rel="icon" href="/static/decals/decal.ico" type="image/x-icon"> <!--the tab icon-->
+    <link rel="stylesheet" href="/static/styles/profile.css"> <!-- Profile-specific styles -->
+</head>
+<body>
+    <!-- this header is the title of the page but not the name of the tab-->
+    <nav>
+        <div class="profile-container">
+            {% if user.profile_picture %}
+                <img class="pfp" src="{{ url_for('data', filename='profiles/' + user.profile_picture) }}" alt="Profile Picture" class="profile-picture">
+            {% else %}
+                <img class="pfp" src="{{ url_for('static', filename='images/profile-placeholder.png') }}" alt="Default Profile Picture" class="profile-picture">
+            {% endif %}
+        </div>
+        <div class="usernav">
+            <a href="/login">Login</a>
+            <a href="/register">Register</a>
+            <a href="/logout">Logout</a>
+            <a href="/profile">Profile</a>
+            <a href="/settings">Settings</a>
+        </div>
+    </nav>
+    <header> 
+        <h1>About us</h1>
+    </header>
+
+    <nav class="navbar"> <!-- this is navigation-->
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+        <a href="/contact">Contact</a>
+        <a href="/support">Support</a>
+        <a href="/chat">Chat</a>
+        <a href="/changelogs">Changelogs</a>
+    </nav>
+
+    <div class="container">
+        <h2>Our Mission</h2>
+        <p>We aim to create a user-friendly platform for learning and discovery.</p>
+        <h2>Our Team</h2>
+        <p>We are a group of passionate developers working together to improve web experiences.</p>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Your Website</p>
+    </footer>
+
+</body>
+</html>

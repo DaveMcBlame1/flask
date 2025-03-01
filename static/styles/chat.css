@@ -1,0 +1,155 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+#chatbox {
+    width: 60%;
+    height: 500px;
+    border: 0px solid rgb(161, 160, 160);
+    overflow-y: scroll;
+    scrollbar-width: none;
+    background-color: rgb(161, 160, 160);
+    padding: 10px;
+    box-sizing: border-box;
+    margin-bottom: 2px;
+    color: black;
+    border-top-left-radius: 15px;
+    border-bottom-left-radius: 15px;
+}
+
+#chatbox::-webkit-scrollbar {
+    display: none;
+}
+
+#message {
+    width: 40%;
+    padding: 10px;
+    box-sizing: border-box;
+    margin-right: 2%;
+    color: #333;
+}
+
+#send {
+    width: 18%;
+    padding: 10px;
+    box-sizing: border-box;
+    margin-bottom: 100px; 
+    margin-left: -30px;
+}
+
+.message {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.pfp {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.message-content {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    margin-left: 42%;
+}
+
+.message-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.message-body {
+    word-wrap: break-word; /* Break long words */
+    max-width: 80ch; /* Set the maximum width to 80 characters */
+}
+
+.message-id {
+    font-size: 0.8em;
+    color: #888;
+    margin-left: auto; /* Move the message ID to the far right */
+}
+
+.username {
+    font-weight: bold;
+    color: #333;
+}
+
+.system-message .username {
+    color: red; /* Change this to the desired color */
+    font-weight: bold;
+}
+
+.user-list {
+    width: 16%;
+    height: 500px;
+    border: 0px solid rgb(161, 160, 160);
+    overflow-y: scroll;
+    scrollbar-width: none;
+    background-color: rgb(161, 160, 160);
+    padding: 10px;
+    box-sizing: border-box;
+    color: black;
+    margin-left: 60%;
+    margin-top: -45.05%;
+}
+
+.user-list::-webkit-scrollbar {
+    display: none;
+}
+
+#typing-indicator {
+    color: #000000;
+    font-size: 0.8em;
+    margin-top: -1%;
+    margin-left: 1%;
+}
+
+.ultitle {
+    font-size: 1.5em;
+    color: #000000;
+    margin-left: 5%;
+    border: #000000;
+    background-color: #333;
+    border-radius: 8px;
+    height: 8%;
+    width: 80%;
+    text-align: center;
+    padding: 8px;
+    padding-bottom: 1px;
+}
+
+.users {
+    font-size: 1em;
+    color: #000000;
+    text-align: center;
+    background-color: #333;
+    border-radius: 5px;
+    height: 80%;
+    overflow-y: auto; /* Allow scrolling when content overflows */
+    scrollbar-width: none; /* Hide the scrollbar */
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.viewer {
+    font-size: 1em;
+    color: #000000;
+    text-align: center;
+    background-color: #858;
+    border-radius: 5px;
+    margin: 5px 0; /* Add margin to separate the elements */
+    padding: 5px;
+    width: 100%; /* Ensure the viewer elements take full width */
+    box-sizing: border-box;
+}

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="/static/js/chat.js"></script>
+    <link rel="icon" href="/static/decals/decal.ico" type="image/x-icon"> <!--the tab icon-->
+    <link rel="stylesheet" href="/static/styles/chat.css">
+    <link rel="stylesheet" href="/static/styles/loading.css" id="theme-link"> <!-- Default theme -->
+    <link rel="stylesheet" href="/static/styles/profile.css"> <!-- Profile-specific styles -->
+</head>
+<body>
+    <!-- this header is the title of the page but not the name of the tab-->
+    <nav>
+        <div class="profile-container">
+            {% if user.profile_picture %}
+                <img class="pfp" src="{{ url_for('data', filename='profiles/' + user.profile_picture) }}" alt="Profile Picture" class="profile-picture">
+            {% else %}
+                <img class="pfp" src="{{ url_for('static', filename='images/profile-placeholder.png') }}" alt="Default Profile Picture" class="profile-picture">
+            {% endif %}
+        </div>
+        <div class="usernav">
+            <a href="/login">Login</a>
+            <a href="/register">Register</a>
+            <a href="/logout">Logout</a>
+            <a href="/profile">Profile</a>
+            <a href="/settings">Settings</a>
+        </div>
+    </nav>
+    <header> 
+        <h1>Global Chat</h1>
+    </header>
+
+    <nav class="navbar"> <!-- this is navigation-->
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+        <a href="/contact">Contact</a>
+        <a href="/support">Support</a>
+        <a href="/chat">Chat</a>
+        <a href="/changelogs">Changelogs</a>
+    </nav>
+
+    <main>
+        <h1>Welcome to the Chat, {{ username }}!</h1>
+        <div id="chatbox">
+            {% for msg in messages %}
+                <div class="message">
+                    <img class="pfp" src="{{ msg.profile_picture_url }}" alt="Profile Picture">
+                    <div class="message-content">
+                        <div class="message-header">
+                            <span class="username">{{ msg.username }}:</span>
+                            <span class="message-id" data-id="{{ msg.id }}">{{ msg.id }}</span>
+                        </div>
+                        <div class="message-body">
+                            {{ msg.message }}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <button id="load-more">Load More</button>
+        <input type="text" id="message" placeholder="Type your message here..." {{ 'disabled' if not username else '' }}>
+        <button id="send" {{ 'disabled' if not username else '' }}>Send</button>
+        <div class="user-list">
+            <h2 class="ultitle">Users Online</h2>
+            <div class="users">
+                {% for user in users %}
+                    <p class="viewer">{{ user }}</p>
+                {% endfor %}
+            </div>
+        </div>
+        <div id="typing-indicator"></div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Your Website</p>
+    </footer>
+</body>
+</html>

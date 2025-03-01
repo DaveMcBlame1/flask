@@ -1,0 +1,89 @@
+:root {
+    --transition-duration: 0.2s;
+}
+body {
+    font-family: Arial, sans-serif;
+    background-color: #2e2e2e; /* Darker background */
+    color: #00ff5e; /* Light text color */
+    margin: 0;
+    padding: 0;
+    transition: background-color var(--transition-duration), color var(--transition-duration);
+}
+header {
+    background-color: #1a1a1a; /* Darker header */
+    color: #00ff5e; /* Light text color */
+    padding: 10px 0;
+    text-align: center;
+    height: 60px;
+    transition: background-color var(--transition-duration), color var(--transition-duration);
+}
+.usernav {
+	background-color: #232323;
+	padding: 18px;
+	text-align: center;
+	transition: background-color var(--transition-duration), color var(--transition-duration);
+}
+.navbar {
+    background-color: #232323; /* Darker navigation */
+    padding: 10px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    transition: background-color var(--transition-duration), color var(--transition-duration);
+}
+nav a {
+    color: #00ff5e; /* Light text color */
+    margin: 0 15px;
+    text-decoration: none;
+    transition: background-color var(--transition-duration), color var(--transition-duration);
+}
+nav a:hover {
+    color: #b3b3b3; /* Slightly lighter text color on hover */
+    transition: background-color var(--transition-duration), color var(--transition-duration);
+}
+.container {
+    padding: 20px;
+    transition: background-color var(--transition-duration), color var(--transition-duration);
+}
+/* Style the link to look like normal text */
+.container a {
+    color: inherit; /* Inherit the color from the parent element */
+    text-decoration: none; /* Remove the underline */
+}
+
+.container a:hover {
+    text-decoration: underline; /* Optionally add underline on hover */
+}
+footer {
+    background-color: #1a1a1a; /* Darker footer */
+    color: #00ff5e; /* Light text color */
+    text-align: center;
+    padding: 10px 0;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    transition: background-color var(--transition-duration), color var(--transition-duration);
+}
+.sorrytext {
+    font-size: 2em;
+    color: #00ff5e;
+}
+.homepage {
+    display: block;
+    margin-top: 20px;
+    font-size: 1.5em;
+    color: #00ff5e;
+}
+.ButtonThemeChanger {
+    color: #2e2e2e;
+    font-size: 16px;
+    transition: background-color var(--transition-duration), color var(--transition-duration);
+}
+.logs {
+    color: #ffffff;
+    font-size: 1.5em;
+    overflow-y: auto;
+    margin-bottom: 90px;
+    margin-left: 15px;
+}
