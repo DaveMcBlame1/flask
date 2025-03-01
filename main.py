@@ -1,4 +1,3 @@
-import logging
 from flask import Flask, render_template, request, redirect, url_for, session, abort, send_from_directory, jsonify, g
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
@@ -49,16 +48,6 @@ class BannedUser(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
 
-logging.basicConfig(filename='app.log', level=logging.DEBUG, 
-                    format='%(asctime)s - %(levelname)s - %(message)s')
-
-# Add a console handler to log to the console as well
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.DEBUG)
-console_handler.setFormatter(logging.Formatter('%(levelname)s - %(message)s'))
-logging.getLogger().addHandler(console_handler)
-
-# Decorator for access control based on authorized users
 def owner_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -75,7 +64,6 @@ def custom_static(filename):
 
 @app.route('/data/<path:filename>')
 def data(filename):
-    app.logger.info(f"Request URL: {request.url} IM RIGHT HEREEEEEEEEEEEEEEEE")
     return send_from_directory('data', filename)
 
 # Context processor to add user to all templates
@@ -89,43 +77,34 @@ def inject_user():
 # Routes or endpoints
 @app.route("/")
 def index():
-    app.logger.info(f"Request URL: {request.url}")
     return render_template("index.html")
 
 @app.route("/about")
 def about():
-    app.logger.info(f"Request URL: {request.url}")
     return render_template("about.html")
 
 @app.route("/settings")
 def settings():
-    app.logger.info(f"Request URL: {request.url}")
     return render_template("settings.html")
 
 @app.route("/contact")
 def contact():
-    app.logger.info(f"Request URL: {request.url}")
     return render_template("contact.html")
 
 @app.route("/support")
 def support():
-    app.logger.info(f"Request URL: {request.url}")
     return render_template("support.html")
 
 @app.route("/trigger-error")
 def trigger_error():
-    app.logger.info(f"Request URL: {request.url}")
-    # Manually raise an exception to trigger the debugger
     raise Exception("This is a test exception to trigger the Flask debugger")
 
 @app.route("/changelogs")
 def changelogs():
-    app.logger.info(f"Request URL: {request.url}")
     return render_template("changelogs.html")
 
 @app.route("/profile")
 def profile():
-    app.logger.info(f"Request URL: {request.url}")
     if "username" not in session:
         return redirect(url_for("login"))
     
@@ -138,7 +117,6 @@ def profile():
 # User authentication
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    app.logger.info(f"Request URL: {request.url}")
     if request.method == "POST":
         username = request.form["username"]
         password = bcrypt.generate_password_hash(request.form["password"]).decode("utf-8")
@@ -153,7 +131,6 @@ def register():
 # User login
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    app.logger.info(f"Request URL: {request.url}")
     if request.method == "POST":
         username = request.form["username"].strip()
         password = request.form["password"].strip()
@@ -174,14 +151,12 @@ def login():
 
 @app.route("/logout")
 def logout():
-    app.logger.info(f"Request URL: {request.url}")
     session.pop("username", None)  # Remove the username from the session
     return render_template("logout.html")
 
 # Chat room
 @app.route("/chat")
 def chat():
-    app.logger.info(f"Request URL: {request.url}")
     if "username" not in session:
         return redirect(url_for("login"))
     
@@ -205,7 +180,6 @@ def chat():
 
 @app.route("/more_messages/<int:offset>")
 def more_messages(offset):
-    app.logger.info(f"Request URL: {request.url}")
     if "username" not in session:
         return redirect(url_for("login"))
     # Fetch the next set of messages with the given offset
@@ -448,19 +422,16 @@ def upload_profile_picture():
 @app.route("/testing")
 @owner_required
 def logs():
-    app.logger.warning("user failed to access admin panel")
     return render_template("testing.html")
 
 # Error handling
 @app.errorhandler(404)
 def page_not_found(error):
-    app.logger.error(f"404 error occurred: {error}")
     return render_template('/error/404.html'), 404
 
 @app.errorhandler(403)
 def access_denied(error):
-    app.logger.error(f"403 error occurred: {error}")
     return render_template('/error/403.html'), 403
 
 if __name__ == "__main__":
-    socketio.run(app, debug=True, port=28565, host='0.0.0.0')
+    socketio.run(app, port=5000)
