@@ -24,6 +24,23 @@ users = {}  # Dictionary to track users by their session IDs
 def get_db():
     if 'db' not in g:
         g.db = sqlite3.connect('data/database.db')
+        g.db.execute('''CREATE TABLE IF NOT EXISTS users (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            username TEXT UNIQUE NOT NULL,
+                            password TEXT NOT NULL,
+                            profile_picture TEXT
+                        )''')
+        g.db.execute('''CREATE TABLE IF NOT EXISTS bannedusers (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            username TEXT UNIQUE NOT NULL
+                        )''')
+        g.db.execute('''CREATE TABLE IF NOT EXISTS messages (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            username TEXT NOT NULL,
+                            message TEXT NOT NULL,
+                            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+                        )''')
+        g.db.commit()
     return g.db
 
 @app.teardown_appcontext
