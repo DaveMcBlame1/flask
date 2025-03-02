@@ -5,7 +5,7 @@ from functools import wraps
 from werkzeug.utils import secure_filename
 import os
 from PIL import Image
-import sqlite3
+from mysql.connector import connection
 
 # Initialize the Flask app
 app = Flask(__name__, template_folder='source')
@@ -24,22 +24,25 @@ users = {}  # Dictionary to track users by their session IDs
 # Connect to the database
 def get_db():
     if 'db' not in g:
-        g.db = sqlite3.connect('data/database.db')
-        g.db.execute('''CREATE TABLE IF NOT EXISTS users (
-                            id INTEGER PRIMARY KEY AUTOINCREMENT,
-                            username TEXT UNIQUE NOT NULL,
-                            password TEXT NOT NULL,
+        g.db = connection.MySQLConnection(user='root', password='YUtkvAicAsLgKzfucuXPPEAwxdzbsgUK',
+                                          host='mysql.railway.internal',
+                                          database='railway')
+        cursor = g.db.cursor()
+        cursor.execute('''CREATE TABLE IF NOT EXISTS user (
+                            id INT AUTO_INCREMENT PRIMARY KEY,
+                            username VARCHAR(80) UNIQUE NOT NULL,
+                            password VARCHAR(200) NOT NULL,
                             profile_picture TEXT
                         )''')
-        g.db.execute('''CREATE TABLE IF NOT EXISTS bannedusers (
-                            id INTEGER PRIMARY KEY AUTOINCREMENT,
-                            username TEXT UNIQUE NOT NULL
+        cursor.execute('''CREATE TABLE IF NOT EXISTS banned_user (
+                            id INT AUTO_INCREMENT PRIMARY KEY,
+                            username VARCHAR(255) UNIQUE NOT NULL
                         )''')
-        g.db.execute('''CREATE TABLE IF NOT EXISTS messages (
-                            id INTEGER PRIMARY KEY AUTOINCREMENT,
-                            username TEXT NOT NULL,
-                            message TEXT NOT NULL,
-                            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        cursor.execute('''CREATE TABLE IF NOT EXISTS message (
+                            id INT AUTO_INCREMENT PRIMARY KEY,
+                            username VARCHAR(80) NOT NULL,
+                            message VARCHAR(500) NOT NULL,
+                            timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
                         )''')
         g.db.commit()
     return g.db
@@ -54,13 +57,13 @@ def close_db(exception):
 def get_user_by_username(username):
     db = get_db()
     cursor = db.cursor()
-    cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
+    cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
     return cursor.fetchone()
 
 def create_user(username, password):
     db = get_db()
     cursor = db.cursor()
-    cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+    cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (username, password))
     db.commit()
 
 def get_all_banned_users():
@@ -72,13 +75,13 @@ def get_all_banned_users():
 def ban_user(username):
     db = get_db()
     cursor = db.cursor()
-    cursor.execute("INSERT INTO bannedusers (username) VALUES (?)", (username,))
+    cursor.execute("INSERT INTO bannedusers (username) VALUES (%s)", (username,))
     db.commit()
 
 def unban_user(username):
     db = get_db()
     cursor = db.cursor()
-    cursor.execute("DELETE FROM bannedusers WHERE username = ?", (username,))
+    cursor.execute("DELETE FROM bannedusers WHERE username = %s", (username,))
     db.commit()
 
 def owner_required(f):
@@ -218,7 +221,7 @@ def more_messages(offset):
         return redirect(url_for("login"))
     db = get_db()
     cursor = db.cursor()
-    cursor.execute("SELECT * FROM messages ORDER BY timestamp DESC LIMIT 25 OFFSET ?", (offset,))
+    cursor.execute("SELECT * FROM messages ORDER BY timestamp DESC LIMIT 25 OFFSET %s", (offset,))
     messages = cursor.fetchall()
     messages.reverse()
     return jsonify([{
@@ -235,7 +238,7 @@ def handle_delete_message(data):
         message_id = data['message_id']
         db = get_db()
         cursor = db.cursor()
-        cursor.execute("DELETE FROM messages WHERE id = ?", (message_id,))
+        cursor.execute("DELETE FROM messages WHERE id = %s", (message_id,))
         db.commit()
         emit('message_deleted', {'message_id': message_id}, broadcast=True)
         emit('message', {'username': 'System', 'message': f'Message {message_id} deleted by {username}', 'system': True}, broadcast=True)
@@ -288,7 +291,7 @@ def handle_message(data):
                 message_id = args[0]
                 db = get_db()
                 cursor = db.cursor()
-                cursor.execute("DELETE FROM messages WHERE id = ?", (message_id,))
+                cursor.execute("DELETE FROM messages WHERE id = %s", (message_id,))
                 db.commit()
                 emit('message_deleted', {'message_id': message_id}, broadcast=True)
                 emit('message', {
@@ -344,7 +347,7 @@ def handle_message(data):
             # Normal message
             db = get_db()
             cursor = db.cursor()
-            cursor.execute("INSERT INTO messages (username, message) VALUES (?, ?)", (username, message_text))
+            cursor.execute("INSERT INTO messages (username, message) VALUES (%s, %s)", (username, message_text))
             db.commit()
             message_id = cursor.lastrowid
 
@@ -434,7 +437,7 @@ def upload_profile_picture():
         # Update user's profile picture in the database
         db = get_db()
         cursor = db.cursor()
-        cursor.execute("UPDATE users SET profile_picture = ? WHERE id = ?", (png_filename, user[0]))
+        cursor.execute("UPDATE users SET profile_picture = %s WHERE id = %s", (png_filename, user[0]))
         db.commit()
 
         return redirect(url_for("profile"))
