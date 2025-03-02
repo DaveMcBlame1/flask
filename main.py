@@ -10,7 +10,7 @@ from PIL import Image
 # Initialize the Flask app
 app = Flask(__name__, template_folder='source')
 app.config["SQLALCHEMY_BINDS"] = {
-    'users': 'mysql://root:IreqgtmmEHAyQtgJxDgwMrdEeBTIFKoa@nozomi.proxy.rlwy.net:20515/railway',
+    'users': 'mysql+pymysql://root:IreqgtmmEHAyQtgJxDgwMrdEeBTIFKoa@nozomi.proxy.rlwy.net:20515/railway',
     'messages': 'sqlite:///messages.db',
     'bannedusers': 'sqlite:///bannedusers.db'
 }
@@ -19,6 +19,7 @@ app.config["SECRET_KEY"] = "your_secret_key"  # Set a secret key for session man
 app.config["UPLOAD_FOLDER"] = "data/profileexchange"  # Folder to store uploaded files
 app.config["PROFILE_FOLDER"] = "data/profiles"  # Folder to store profile pictures
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # Limit file uploads to 5 MB
+
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 socketio = SocketIO(app)
