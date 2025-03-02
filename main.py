@@ -13,6 +13,7 @@ app.config["SECRET_KEY"] = "your_secret_key"  # Set a secret key for session man
 app.config["UPLOAD_FOLDER"] = "data/profileexchange"  # Folder to store uploaded files
 app.config["PROFILE_FOLDER"] = "data/profiles"  # Folder to store profile pictures
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # Limit file uploads to 5 MB
+app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg'}
 
 bcrypt = Bcrypt(app)
 socketio = SocketIO(app, async_mode="eventlet", ping_timeout=60, ping_interval=25)
@@ -420,7 +421,7 @@ def upload_profile_picture():
         original_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
         file.save(original_path)
 
-        # Convert the image to PNG, resize to 512x512, and remove metadata
+        # Convert the image to PNG, resize to 128x128, and remove metadata
         img = Image.open(original_path)
         img = img.resize((128, 128))
         png_filename = f"{user[0]}.png"  # Use the user's ID for the filename
