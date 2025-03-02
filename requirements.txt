@@ -6,3 +6,4 @@ Flask-SocketIO
 Werkzeug
 Pillow
 PyMySQL
+eventlet

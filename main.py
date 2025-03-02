@@ -15,7 +15,7 @@ app.config["PROFILE_FOLDER"] = "data/profiles"  # Folder to store profile pictur
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # Limit file uploads to 5 MB
 
 bcrypt = Bcrypt(app)
-socketio = SocketIO(app, cors_allowed_origins="*")  # Change "*" to your frontend's URL if needed
+socketio = SocketIO(app, async_mode="eventlet", ping_timeout=60, ping_interval=25)
 
 AUTHORIZED_USERS = ['Owner', 'DaveMcBlame']
 users = {}  # Dictionary to track users by their session IDs
