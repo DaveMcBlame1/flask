@@ -1,53 +1,67 @@
 from flask import Flask, render_template, request, redirect, url_for, session, abort, send_from_directory, jsonify, g
-from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_socketio import SocketIO, emit, join_room, leave_room, disconnect
 from functools import wraps
 from werkzeug.utils import secure_filename
 import os
 from PIL import Image
+import sqlite3
 
 # Initialize the Flask app
 app = Flask(__name__, template_folder='source')
-app.config["SQLALCHEMY_BINDS"] = {
-    'users': 'mysql+pymysql://root:IreqgtmmEHAyQtgJxDgwMrdEeBTIFKoa@nozomi.proxy.rlwy.net:20515/railway',
-    'messages': 'sqlite:///messages.db',
-    'bannedusers': 'sqlite:///bannedusers.db'
-}
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SECRET_KEY"] = "your_secret_key"  # Set a secret key for session management
 app.config["UPLOAD_FOLDER"] = "data/profileexchange"  # Folder to store uploaded files
 app.config["PROFILE_FOLDER"] = "data/profiles"  # Folder to store profile pictures
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # Limit file uploads to 5 MB
 
-db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 socketio = SocketIO(app)
 
 AUTHORIZED_USERS = ['Owner', 'DaveMcBlame']
 users = {}  # Dictionary to track users by their session IDs
 
+# Connect to the database
+def get_db():
+    if 'db' not in g:
+        g.db = sqlite3.connect('data/database.db')
+    return g.db
+
+@app.teardown_appcontext
+def close_db(exception):
+    db = g.pop('db', None)
+    if db is not None:
+        db.close()
+
 # Create a User model
-class User(db.Model):
-    __bind_key__ = 'users'
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    password = db.Column(db.String(200), nullable=False)
-    profile_picture = db.Column(db.String(200), nullable=True)  # Add profile_picture field
+def get_user_by_username(username):
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
+    return cursor.fetchone()
 
-# Create a Message model
-class Message(db.Model):
-    __bind_key__ = 'messages'
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80) , nullable=False)
-    message = db.Column(db.String(500), nullable=False)
-    timestamp = db.Column(db.DateTime, default=db.func.current_timestamp(), nullable=False)
+def create_user(username, password):
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+    db.commit()
 
-# Create a BannedUser model
-class BannedUser(db.Model):
-    __bind_key__ = 'bannedusers'
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
+def get_all_banned_users():
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM bannedusers")
+    return cursor.fetchall()
+
+def ban_user(username):
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("INSERT INTO bannedusers (username) VALUES (?)", (username,))
+    db.commit()
+
+def unban_user(username):
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("DELETE FROM bannedusers WHERE username = ?", (username,))
+    db.commit()
 
 def owner_required(f):
     @wraps(f)
@@ -71,7 +85,7 @@ def data(filename):
 @app.context_processor
 def inject_user():
     if "username" in session:
-        user = User.query.filter_by(username=session["username"]).first()
+        user = get_user_by_username(session["username"])
         return dict(user=user)
     return dict(user=None)
 
@@ -109,7 +123,7 @@ def profile():
     if "username" not in session:
         return redirect(url_for("login"))
     
-    user = User.query.filter_by(username=session["username"]).first()
+    user = get_user_by_username(session["username"])
     if not user:
         return "User not found", 404
 
@@ -121,11 +135,9 @@ def register():
     if request.method == "POST":
         username = request.form["username"]
         password = bcrypt.generate_password_hash(request.form["password"]).decode("utf-8")
-        if User.query.filter_by(username=username).first():
+        if get_user_by_username(username):
             return "Username already taken!"
-        new_user = User(username=username, password=password)
-        db.session.add(new_user)
-        db.session.commit()
+        create_user(username, password)
         return redirect(url_for("login"))
     return render_template("register.html")
 
@@ -139,10 +151,10 @@ def login():
         if not username or not password:
             return "Username and password cannot be empty!"
 
-        user = User.query.filter_by(username=username).first()
+        user = get_user_by_username(username)
         if user:
             try:
-                if bcrypt.check_password_hash(user.password, password):
+                if bcrypt.check_password_hash(user[2], password):
                     session["username"] = username  # Store the username in the session
                     return redirect(url_for("chat"))  # Redirect to the chat page after successful login
             except ValueError:
@@ -161,19 +173,22 @@ def chat():
     if "username" not in session:
         return redirect(url_for("login"))
     
-    messages = Message.query.order_by(Message.timestamp.desc()).limit(50).all()
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM messages ORDER BY timestamp DESC LIMIT 50")
+    messages = cursor.fetchall()
     messages.reverse()
     
     # Include profile picture URL with each message
     messages_with_pics = []
     for msg in messages:
-        user = User.query.filter_by(username=msg.username).first()
-        profile_picture = user.profile_picture if user and user.profile_picture else 'images/profile-placeholder.png'
-        profile_picture_url = url_for('data', filename='profiles/' + profile_picture) if user and user.profile_picture else url_for('static', filename=profile_picture)
+        user = get_user_by_username(msg[1])
+        profile_picture = user[3] if user and user[3] else 'images/profile-placeholder.png'
+        profile_picture_url = url_for('data', filename='profiles/' + profile_picture) if user and user[3] else url_for('static', filename=profile_picture)
         messages_with_pics.append({
-            'username': msg.username,
-            'message': msg.message,
-            'id': msg.id,
+            'username': msg[1],
+            'message': msg[2],
+            'id': msg[0],
             'profile_picture_url': profile_picture_url
         })
     
@@ -183,15 +198,16 @@ def chat():
 def more_messages(offset):
     if "username" not in session:
         return redirect(url_for("login"))
-    # Fetch the next set of messages with the given offset
-    messages = Message.query.order_by(Message.timestamp.desc()).offset(offset).limit(25).all()
-    # Reverse the order to display the oldest message first
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM messages ORDER BY timestamp DESC LIMIT 25 OFFSET ?", (offset,))
+    messages = cursor.fetchall()
     messages.reverse()
     return jsonify([{
-        'id': msg.id,
-        'username': msg.username,
-        'message': msg.message,
-        'timestamp': msg.timestamp.isoformat()
+        'id': msg[0],
+        'username': msg[1],
+        'message': msg[2],
+        'timestamp': msg[3]
     } for msg in messages])
 
 @socketio.on('delete_message')
@@ -199,14 +215,12 @@ def handle_delete_message(data):
     username = session.get("username")
     if username in AUTHORIZED_USERS:  # Check if the username is in the list of authorized users
         message_id = data['message_id']
-        message = Message.query.get(message_id)
-        if message:
-            db.session.delete(message)
-            db.session.commit()
-            emit('message_deleted', {'message_id': message_id}, broadcast=True)
-            emit('message', {'username': 'System', 'message': f'Message {message_id} deleted by {username}', 'system': True}, broadcast=True)
-        else:
-            emit('message', {'username': 'System', 'message': f'Message {message_id} not found', 'system': True}, broadcast=True)
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute("DELETE FROM messages WHERE id = ?", (message_id,))
+        db.commit()
+        emit('message_deleted', {'message_id': message_id}, broadcast=True)
+        emit('message', {'username': 'System', 'message': f'Message {message_id} deleted by {username}', 'system': True}, broadcast=True)
     else:
         emit('message', {'username': 'System', 'message': 'You do not have permission to delete messages', 'system': True}, broadcast=True)
 
@@ -215,7 +229,7 @@ def handle_message(data):
     username = session.get("username")
     if username:
         # Check if the user is banned
-        if BannedUser.query.filter_by(username=username).first():
+        if username in [user[1] for user in get_all_banned_users()]:
             emit('message', {
                 'username': 'System',
                 'message': 'You are banned from chatting.',
@@ -249,31 +263,22 @@ def handle_message(data):
                     return
 
                 message_id = args[0]
-                message = Message.query.get(message_id)
-                if message:
-                    db.session.delete(message)
-                    db.session.commit()
-                    emit('message_deleted', {'message_id': message_id}, broadcast=True)
-                    emit('message', {
-                        'username': 'System',
-                        'message': f'Message {message_id} deleted by {username}',
-                        'system': True,
-                        'profile_picture_url': url_for('static', filename='images/profile-placeholder.png')  # Default system profile picture
-                    }, broadcast=True)
-                else:
-                    emit('message', {
-                        'username': 'System',
-                        'message': f'Message {message_id} not found',
-                        'system': True,
-                        'profile_picture_url': url_for('static', filename='images/profile-placeholder.png')  # Default system profile picture
-                    }, broadcast=True)
+                db = get_db()
+                cursor = db.cursor()
+                cursor.execute("DELETE FROM messages WHERE id = ?", (message_id,))
+                db.commit()
+                emit('message_deleted', {'message_id': message_id}, broadcast=True)
+                emit('message', {
+                    'username': 'System',
+                    'message': f'Message {message_id} deleted by {username}',
+                    'system': True,
+                    'profile_picture_url': url_for('static', filename='images/profile-placeholder.png')  # Default system profile picture
+                }, broadcast=True)
             elif command == 'ban' and len(args) == 1:
                 user_to_ban = args[0]
-                user = User.query.filter_by(username=user_to_ban).first()
-                if user and not BannedUser.query.filter_by(id=user.id).first():
-                    banned_user = BannedUser(id=user.id, username=user_to_ban)
-                    db.session.add(banned_user)
-                    db.session.commit()
+                user = get_user_by_username(user_to_ban)
+                if user and user_to_ban not in [user[1] for user in get_all_banned_users()]:
+                    ban_user(user_to_ban)
                     emit('message', {
                         'username': 'System',
                         'message': f'User {user_to_ban} has been banned by {username}',
@@ -289,25 +294,15 @@ def handle_message(data):
                     }, broadcast=True)
             elif command == 'unban' and len(args) == 1:
                 user_to_unban = args[0]
-                user = User.query.filter_by(username=user_to_unban).first()
+                user = get_user_by_username(user_to_unban)
                 if user:
-                    banned_user = BannedUser.query.filter_by(id=user.id).first()
-                    if banned_user:
-                        db.session.delete(banned_user)
-                        db.session.commit()
-                        emit('message', {
-                            'username': 'System',
-                            'message': f'User {user_to_unban} has been unbanned by {username}',
-                            'system': True,
-                            'profile_picture_url': url_for('static', filename='images/profile-placeholder.png')  # Default system profile picture
-                        }, broadcast=True)
-                    else:
-                        emit('message', {
-                            'username': 'System',
-                            'message': f'User {user_to_unban} is not banned.',
-                            'system': True,
-                            'profile_picture_url': url_for('static', filename='images/profile-placeholder.png')  # Default system profile picture
-                        }, broadcast=True)
+                    unban_user(user_to_unban)
+                    emit('message', {
+                        'username': 'System',
+                        'message': f'User {user_to_unban} has been unbanned by {username}',
+                        'system': True,
+                        'profile_picture_url': url_for('static', filename='images/profile-placeholder.png')  # Default system profile picture
+                    }, broadcast=True)
                 else:
                     emit('message', {
                         'username': 'System',
@@ -324,19 +319,21 @@ def handle_message(data):
                 }, broadcast=True)
         else:
             # Normal message
-            message = Message(username=username, message=message_text)
-            db.session.add(message)
-            db.session.commit()
+            db = get_db()
+            cursor = db.cursor()
+            cursor.execute("INSERT INTO messages (username, message) VALUES (?, ?)", (username, message_text))
+            db.commit()
+            message_id = cursor.lastrowid
 
             # Include profile picture URL with the message
-            user = User.query.filter_by(username=username).first()
-            profile_picture = user.profile_picture if user and user.profile_picture else 'images/profile-placeholder.png'
-            profile_picture_url = url_for('data', filename='profiles/' + profile_picture) if user and user.profile_picture else url_for('static', filename=profile_picture)
+            user = get_user_by_username(username)
+            profile_picture = user[3] if user and user[3] else 'images/profile-placeholder.png'
+            profile_picture_url = url_for('data', filename='profiles/' + profile_picture) if user and user[3] else url_for('static', filename=profile_picture)
 
             emit('message', {
                 'username': username,
                 'message': message_text,
-                'message_id': message.id,
+                'message_id': message_id,
                 'profile_picture_url': profile_picture_url,
                 'system': False
             }, broadcast=True)
@@ -393,7 +390,7 @@ def upload_profile_picture():
 
     file = request.files["profile_picture"]
     if file:
-        user = User.query.filter_by(username=session["username"]).first()
+        user = get_user_by_username(session["username"])
         if not user:
             return "User not found", 404
 
@@ -404,7 +401,7 @@ def upload_profile_picture():
         # Convert the image to PNG, resize to 512x512, and remove metadata
         img = Image.open(original_path)
         img = img.resize((128, 128))
-        png_filename = f"{user.id}.png"  # Use the user's ID for the filename
+        png_filename = f"{user[0]}.png"  # Use the user's ID for the filename
         png_path = os.path.join(app.config["PROFILE_FOLDER"], png_filename)
         img.save(png_path, "PNG")
 
@@ -412,8 +409,10 @@ def upload_profile_picture():
         os.remove(original_path)
 
         # Update user's profile picture in the database
-        user.profile_picture = png_filename
-        db.session.commit()
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute("UPDATE users SET profile_picture = ? WHERE id = ?", (png_filename, user[0]))
+        db.commit()
 
         return redirect(url_for("profile"))
 
