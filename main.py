@@ -15,7 +15,7 @@ app.config["PROFILE_FOLDER"] = "data/profiles"  # Folder to store profile pictur
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # Limit file uploads to 5 MB
 
 bcrypt = Bcrypt(app)
-socketio = SocketIO(app)
+socketio = SocketIO(app, cors_allowed_origins="*")  # Change "*" to your frontend's URL if needed
 
 AUTHORIZED_USERS = ['Owner', 'DaveMcBlame']
 users = {}  # Dictionary to track users by their session IDs
@@ -451,4 +451,4 @@ def access_denied(error):
     return render_template('/error/403.html'), 403
 
 if __name__ == "__main__":
-    socketio.run(app, port=5000)
+    socketio.run(app, port=int(os.environ.get("PORT", 5000)))
