@@ -24,7 +24,7 @@ users = {}  # Dictionary to track users by their session IDs
 # Connect to the database
 def get_db():
     if 'db' not in g:
-        g.db = sqlite3.connect('data/database.db')
+        g.db = sqlite3.connect('/data/database.db')
         g.db.execute('''CREATE TABLE IF NOT EXISTS users (
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
                             username TEXT UNIQUE NOT NULL,
