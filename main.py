@@ -10,8 +10,8 @@ import sqlite3
 # Initialize the Flask app
 app = Flask(__name__, template_folder='source')
 app.config["SECRET_KEY"] = "your_secret_key"  # Set a secret key for session management
-app.config["UPLOAD_FOLDER"] = "user_profiles/profileexchange"  # Folder to store uploaded files
-app.config["PROFILE_FOLDER"] = "user_profiles/profiles"  # Folder to store profile pictures
+app.config["UPLOAD_FOLDER"] = "data/profileexchange"  # Folder to store uploaded files
+app.config["PROFILE_FOLDER"] = "data/profiles"  # Folder to store profile pictures
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # Limit file uploads to 5 MB
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg'}
 
@@ -95,9 +95,9 @@ def owner_required(f):
 def custom_static(filename):
     return send_from_directory(os.path.join(app.root_path, 'static'), filename)
 
-@app.route('/user_profiles/<path:filename>')
+@app.route('/data/<path:filename>')
 def data(filename):
-    return send_from_directory('user_profiles', filename)
+    return send_from_directory('data', filename)
 
 # Context processor to add user to all templates
 @app.context_processor
@@ -202,7 +202,7 @@ def chat():
     for msg in messages:
         user = get_user_by_username(msg[1])
         profile_picture = user[3] if user and user[3] else 'images/profile-placeholder.png'
-        profile_picture_url = url_for('user_profiles', filename='profiles/' + profile_picture) if user and user[3] else url_for('static', filename=profile_picture)
+        profile_picture_url = url_for('data', filename='profiles/' + profile_picture) if user and user[3] else url_for('static', filename=profile_picture)
         messages_with_pics.append({
             'username': msg[1],
             'message': msg[2],
@@ -351,7 +351,7 @@ def handle_message(data):
             # Include profile picture URL with the message
             user = get_user_by_username(username)
             profile_picture = user[3] if user and user[3] else 'images/profile-placeholder.png'
-            profile_picture_url = url_for('user_profiles', filename='profiles/' + profile_picture) if user and user[3] else url_for('static', filename=profile_picture)
+            profile_picture_url = url_for('data', filename='profiles/' + profile_picture) if user and user[3] else url_for('static', filename=profile_picture)
 
             emit('message', {
                 'username': username,
