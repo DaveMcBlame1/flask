@@ -7,3 +7,4 @@ Werkzeug
 Pillow
 PyMySQL
 eventlet
+mysql-connector-python
