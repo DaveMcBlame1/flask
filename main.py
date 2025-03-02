@@ -268,7 +268,12 @@ def handle_message(data):
                 return
 
             # Handle command
-            command, *args = message_text[1:].split()
+            if len(message_text[1:].split()) > 0:
+                command, *args = message_text[1:].split()
+            else:
+                # Handle the case where there's not enough data
+                print("Error: message_text does not contain enough values")
+
             if command == 'delete' and len(args) == 1:
                 if username not in AUTHORIZED_USERS:
                     emit('message', {
