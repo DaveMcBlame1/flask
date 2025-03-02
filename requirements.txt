@@ -5,3 +5,4 @@ Flask-Bcrypt
 Flask-SocketIO
 Werkzeug
 Pillow
+PyMySQL
