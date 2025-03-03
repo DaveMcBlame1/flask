@@ -28,7 +28,7 @@ def get_db():
                                           host='mysql.railway.internal', port='3306',
                                           database='railway')
         cursor = g.db.cursor()
-        cursor.execute('''CREATE TABLE IF NOT EXISTS user (
+        cursor.execute('''CREATE TABLE IF NOT EXISTS users (
                             id INT AUTO_INCREMENT PRIMARY KEY,
                             username VARCHAR(80) UNIQUE NOT NULL,
                             password VARCHAR(200) NOT NULL,
