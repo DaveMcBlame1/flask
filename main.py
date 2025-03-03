@@ -24,8 +24,8 @@ users = {}  # Dictionary to track users by their session IDs
 # Connect to the database
 def get_db():
     if 'db' not in g:
-        g.db = connection.MySQLConnection(user='root', password='YUtkvAicAsLgKzfucuXPPEAwxdzbsgUK',
-                                          host='${{RAILWAY_PRIVATE_DOMAIN}}',
+        g.db = connection.MySQLConnection(user='root', password='sGdUDCMPlffiKHJxTDRsrlqOrywwBJHR',
+                                          host='mysql.railway.internal', port='3306',
                                           database='railway')
         cursor = g.db.cursor()
         cursor.execute('''CREATE TABLE IF NOT EXISTS user (
