@@ -34,7 +34,7 @@ def get_db():
                             password VARCHAR(200) NOT NULL,
                             profile_picture TEXT
                         )''')
-        cursor.execute('''CREATE TABLE IF NOT EXISTS banned_users (
+        cursor.execute('''CREATE TABLE IF NOT EXISTS bannedusers (
                             id INT AUTO_INCREMENT PRIMARY KEY,
                             username VARCHAR(255) UNIQUE NOT NULL
                         )''')
