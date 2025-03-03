@@ -34,11 +34,11 @@ def get_db():
                             password VARCHAR(200) NOT NULL,
                             profile_picture TEXT
                         )''')
-        cursor.execute('''CREATE TABLE IF NOT EXISTS banned_user (
+        cursor.execute('''CREATE TABLE IF NOT EXISTS banned_users (
                             id INT AUTO_INCREMENT PRIMARY KEY,
                             username VARCHAR(255) UNIQUE NOT NULL
                         )''')
-        cursor.execute('''CREATE TABLE IF NOT EXISTS message (
+        cursor.execute('''CREATE TABLE IF NOT EXISTS messages (
                             id INT AUTO_INCREMENT PRIMARY KEY,
                             username VARCHAR(80) NOT NULL,
                             message VARCHAR(500) NOT NULL,
